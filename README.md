@@ -16,7 +16,7 @@ external tools. Room work only.
 
 ## Honest integration status (v0.1)
 
-- Connected model vendor: **Google Cloud Vertex AI** (`gemini-2.0-flash-001`),
+- Connected model vendor: **Google Cloud Vertex AI** (`gemini-2.5-flash`, us-east4),
   server-side via the backend service account. Self-reported label: `vertex-ai`.
 - External pull adapters: protocol implemented (`GET assignments`, `POST messages`,
   `POST task-proposals`, `POST brief-proposals`), **none connected in v0.1**.
