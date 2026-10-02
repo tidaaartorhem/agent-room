@@ -329,7 +329,7 @@ export async function applyBriefProposal(
     baseVersion: number; newText: string; authorType: "team" | "owner";
     authorId: string; sourceMessageIds: string[]; autoDraft: boolean;
   }
-): Promise<{ applied: boolean; version?: number }> {
+): Promise<{ applied: boolean; version?: number; reason?: "stale" | "held" }> {
   const d = db();
   const latest = await d.collection(C.briefs).where("roomId", "==", roomId).orderBy("version", "desc").limit(1).get();
   const cur = latest.docs[0]?.data();
@@ -349,7 +349,7 @@ export async function applyBriefProposal(
 
   if (opts.baseVersion !== curVersion) {
     await recordStale();
-    return { applied: false };
+    return { applied: false, reason: "stale" };
   }
   // Owner writes always apply. Team writes apply only under declared auto-draft policy.
   if (opts.authorType === "team" && !opts.autoDraft) {
@@ -362,7 +362,7 @@ export async function applyBriefProposal(
       proposedText: opts.newText.slice(0, CONFIG.textLimitChars),
     });
     await logEvent(roomId, "brief_proposal_held", messageId, { baseVersion: opts.baseVersion });
-    return { applied: false };
+    return { applied: false, reason: "held" };
   }
   const version = curVersion + 1;
   const diff = unifiedDiff(cur?.text ?? "", opts.newText);

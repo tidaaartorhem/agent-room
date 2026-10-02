@@ -29,8 +29,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ roo
         sourceMessageIds: [],
         autoDraft: p.kind === "admin" ? true : (room.autoDraftDefault ?? false),
       });
-      if (!r.applied) throw Object.assign(new Error("stale base version; recorded as visible stale proposal"), { status: 409 });
-      return { applied: true, version: r.version };
+      if (!r.applied && r.reason === "stale") throw Object.assign(new Error("stale base version; recorded as visible stale proposal"), { status: 409 });
+      return { applied: r.applied, held: r.reason === "held", version: r.version };
     });
   } catch (e) {
     const s = (e as Error & { status?: number }).status;
