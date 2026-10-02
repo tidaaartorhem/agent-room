@@ -1,0 +1,8 @@
+# Firebase App Hosting configuration.
+# Next.js full-stack app: UI + API v1 routes in one backend.
+# Secrets policy: NO secrets in this file or in git. The admin bootstrap token
+# is generated at first boot and printed to server logs (rotate via /admin).
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
+  maxInstances: 2

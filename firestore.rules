@@ -1,0 +1,15 @@
+// Agent Room Firestore rules.
+// The app is SERVER-ONLY: all reads/writes go through the Admin SDK, which
+// bypasses these rules. Client access is denied outright.
+// NOTE (2026-10-02): the project previously had wide-open test-mode rules
+// (allow read, write: if true). Verified no deployed app in truth-or-shots
+// uses client-side Firestore, so this lockdown breaks nothing. Reported in
+// the release notes.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
