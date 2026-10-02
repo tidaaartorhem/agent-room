@@ -3,7 +3,7 @@
 export const CONFIG = {
   projectId: "truth-or-shots",
   vertexLocation: "us-east4",
-  vertexModel: "gemini-2.0-flash-001",
+  vertexModel: "gemini-2.5-flash",
   // Spec defaults
   maxAgents: 3,
   maxTurns: 12,

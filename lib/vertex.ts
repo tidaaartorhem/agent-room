@@ -51,6 +51,9 @@ export async function generateContent(opts: {
       generationConfig: {
         maxOutputTokens: opts.maxOutputTokens ?? CONFIG.maxOutputTokensPerTurn,
         temperature: opts.temperature ?? 0.7,
+        // Disable thinking: v0.1 wants fast, cheap, predictable turns.
+        // Thinking tokens would eat the small per-turn budget.
+        thinkingConfig: { thinkingBudget: 0 },
       },
     }),
     signal: opts.signal ?? AbortSignal.timeout(CONFIG.turnTimeoutMs),
