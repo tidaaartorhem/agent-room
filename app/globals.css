@@ -1,6 +1,24 @@
 @import "tailwindcss";
 
 @theme {
+  /* ---- Slack light-theme tokens (inspired-by, hand-rolled) ---- */
+  --color-sl-canvas: #ffffff;
+  --color-sl-sidebar: #f6f4f7;
+  --color-sl-sidebar-hover: #edeaf0;
+  --color-sl-sidebar-active: #ffffff;
+  --color-sl-hover: #f8f8f8;
+  --color-sl-surface: #f1f1f1;
+  --color-sl-border: #dddddd;
+  --color-sl-border-soft: #e9e9e9;
+  --color-sl-text: #1d1c1d;
+  --color-sl-text-2: #616061;
+  --color-sl-link: #1264a3;
+  --color-sl-badge: #e01e5a;
+  --color-sl-green: #007a5a;
+  --color-sl-mention-wash: #fdf3d7;
+  --color-sl-aubergine: #4a154b;
+
+  /* ---- legacy tokens (admin/demo compat) ---- */
   --color-bone: #f7f6f3;
   --color-paper: #ffffff;
   --color-card: #f9f9f8;
@@ -16,34 +34,31 @@
   --color-pale-green-tx: #346538;
   --color-pale-yellow-bg: #fbf3db;
   --color-pale-yellow-tx: #956400;
-  --font-serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+  --font-sans: var(--font-lato), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
 }
 
 html {
-  background: var(--color-bone);
+  background: var(--color-sl-canvas);
 }
 
 body {
-  background: var(--color-bone);
-  color: var(--color-ink);
+  background: var(--color-sl-canvas);
+  color: var(--color-sl-text);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.4667;
   -webkit-font-smoothing: antialiased;
 }
 
-.serif {
-  font-family: var(--font-serif);
-  letter-spacing: -0.02em;
-}
-
-/* Cards: 1px structural borders, crisp radius, no heavy shadows */
+/* legacy helpers */
 .card {
   background: var(--color-paper);
   border: 1px solid var(--color-line);
   border-radius: 8px;
 }
-
 .btn-primary {
   background: #111111;
   color: #ffffff;
@@ -51,26 +66,16 @@ body {
   font-weight: 500;
   transition: transform 80ms ease, background 120ms ease;
 }
-.btn-primary:hover {
-  background: #333333;
-}
-.btn-primary:active {
-  transform: scale(0.98);
-}
-.btn-primary:disabled {
-  opacity: 0.4;
-}
-
+.btn-primary:hover { background: #333333; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.4; }
 .btn-ghost {
   border: 1px solid var(--color-line);
   border-radius: 6px;
   background: var(--color-paper);
   transition: background 120ms ease;
 }
-.btn-ghost:hover {
-  background: var(--color-card);
-}
-
+.btn-ghost:hover { background: var(--color-card); }
 .tag {
   border-radius: 9999px;
   font-size: 11px;
@@ -79,17 +84,6 @@ body {
   padding: 2px 10px;
   font-weight: 600;
 }
-
-pre.diff {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-pre.diff .del { color: var(--color-pale-red-tx); }
-pre.diff .add { color: var(--color-pale-green-tx); }
-
 kbd {
   border: 1px solid var(--color-line);
   border-radius: 4px;
@@ -99,11 +93,17 @@ kbd {
   padding: 1px 6px;
 }
 
-/* Quiet entrance motion */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Slack-style message row hover */
+.sl-msg:hover { background: var(--color-sl-hover); }
+
+/* thin scrollbars like Slack */
+.sl-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.sl-scroll::-webkit-scrollbar-thumb {
+  background: #c9c9c9;
+  border-radius: 4px;
 }
-.rise {
-  animation: rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.sl-scroll::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
 }

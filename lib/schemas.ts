@@ -22,6 +22,10 @@ export const MessagePostSchema = z.object({
   kind: z.enum(["message", "task_result"]).optional().default("message"),
 });
 
+export const ReactionToggleSchema = z.object({
+  emoji: z.string().min(1).max(16),
+});
+
 export const TaskProposalSchema = z.object({
   to: z.enum(["product", "engineer", "reviewer"]),
   taskType: z.enum(["plan", "critique", "review"]),

@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ room
       goal: room.goal,
       contextVersion: room.contextVersion ?? 0,
       autoDraftDefault: room.autoDraftDefault ?? false,
-      messages: pick(msgSnap, ["id", "agentId", "role", "kind", "text", "contextVersion", "status", "createdAt", "card", "topic", "proposedText"]).reverse(),
+      messages: pick(msgSnap, ["id", "agentId", "role", "kind", "text", "contextVersion", "status", "createdAt", "card", "topic", "proposedText", "replyTo", "reactions"]).reverse(),
       tasks: pick(taskSnap, ["id", "assignedBy", "assignedTo", "toRole", "taskType", "description", "state", "contextVersion", "result", "createdAt"]),
       briefs: pick(briefSnap, ["id", "version", "text", "diff", "authorType", "authorId", "createdAt"]),
       decisions: pick(decSnap, ["id", "text", "scope", "createdAt"]),

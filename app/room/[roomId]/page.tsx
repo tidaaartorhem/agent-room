@@ -1,8 +1,8 @@
-import ChatView from "@/components/chat/ChatView";
+import WorkspaceShell from "@/components/slack/WorkspaceShell";
 
 export const dynamic = "force-dynamic";
 
 export default async function RoomPage({ params }: { params: Promise<{ roomId: string }> }) {
   const { roomId } = await params;
-  return <ChatView roomId={roomId} />;
+  return <WorkspaceShell initialRoomId={roomId} />;
 }

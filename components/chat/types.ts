@@ -7,6 +7,8 @@ export interface Participant {
 export interface ChatMessage {
   id: string; agentId?: string; role?: string; kind: string;
   text: string; contextVersion?: number; status?: string; createdAt: number;
+  replyTo?: string | null;
+  reactions?: Record<string, string[]>;
   card?: {
     agreement: string[]; disagreement: string[];
     evidence: { claim: string; from: string }[];
