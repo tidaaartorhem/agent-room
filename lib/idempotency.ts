@@ -20,6 +20,15 @@ export async function checkIdem(
   return { hit: true, result: rec.result };
 }
 
+/**
+ * Strip undefined values (incl. nested) so Firestore .set() never throws
+ * "Cannot use undefined as a Firestore value" on sparse result objects.
+ */
+export function cleanForFirestore<T>(value: T): T {
+  if (value === undefined) return null as T;
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
 export async function storeIdem(
   principalId: string,
   key: string,
@@ -35,7 +44,7 @@ export async function storeIdem(
       principalId,
       key,
       bodyHash,
-      result,
+      result: cleanForFirestore(result),
       createdAt: Date.now(),
       expiresAt: Date.now() + 24 * 3600 * 1000,
     });

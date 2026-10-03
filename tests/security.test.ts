@@ -97,3 +97,17 @@ describe("rate limiter", () => {
     expect(checkRate(id, "write").ok).toBe(false);
   });
 });
+
+describe("idempotency result sanitizer", () => {
+  it("strips undefined fields so Firestore .set() never throws", async () => {
+    const { cleanForFirestore } = await import("@/lib/idempotency");
+    const cleaned = cleanForFirestore({ applied: false, held: true, version: undefined });
+    expect(cleaned).toEqual({ applied: false, held: true });
+    expect("version" in (cleaned as object)).toBe(false);
+  });
+  it("strips nested undefined and maps top-level undefined to null", async () => {
+    const { cleanForFirestore } = await import("@/lib/idempotency");
+    expect(cleanForFirestore({ a: { b: undefined, c: 1 } })).toEqual({ a: { c: 1 } });
+    expect(cleanForFirestore(undefined)).toBe(null);
+  });
+});
