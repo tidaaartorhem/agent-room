@@ -77,29 +77,31 @@ export default function WorkspaceShell({ initialRoomId }: { initialRoomId?: stri
     return { lastMsgAt: last, mentions, unread };
   }, []);
 
-  const refreshRooms = useCallback(async () => {
+  const refreshRooms = useCallback(async (withMeta: boolean) => {
     if (!token) return;
     try {
       const r = await api(`/api/v1/admin/rooms`).catch(() => ({ rooms: [] }));
       const list: RoomSummary[] = r.rooms ?? [];
       setRooms(list);
-      // one-time meta fetch for badges
-      const m: Record<string, Meta> = {};
-      await Promise.all(
-        list.slice(0, 12).map(async (rm) => {
-          try {
-            const s: RoomState = await api(`/api/v1/rooms/${rm.roomId}/state`);
-            m[rm.roomId] = computeMeta(rm.roomId, s);
-          } catch { /* noop */ }
-        })
-      );
-      setMeta((prev) => ({ ...m, ...prev }));
-      if (!roomId && list.length > 0) setRoomId(list[0].roomId);
+      if (withMeta) {
+        // one-time meta fetch for badges
+        const m: Record<string, Meta> = {};
+        await Promise.all(
+          list.slice(0, 12).map(async (rm) => {
+            try {
+              const s: RoomState = await api(`/api/v1/rooms/${rm.roomId}/state`);
+              m[rm.roomId] = computeMeta(rm.roomId, s);
+            } catch { /* noop */ }
+          })
+        );
+        setMeta((prev) => ({ ...prev, ...m }));
+      }
+      setRoomId((cur) => cur ?? (list.length > 0 ? list[0].roomId : null));
       setErr("");
     } catch (e) {
       setErr((e as Error).message);
     }
-  }, [api, token, roomId, computeMeta]);
+  }, [api, token, computeMeta]);
 
   const refreshState = useCallback(async () => {
     if (!token || !roomId) return;
@@ -115,7 +117,11 @@ export default function WorkspaceShell({ initialRoomId }: { initialRoomId?: stri
 
   useEffect(() => {
     if (!token) return;
-    refreshRooms();
+    refreshRooms(true);
+    const iv = setInterval(() => refreshRooms(false), 15000);
+    const onFocus = () => refreshRooms(false);
+    window.addEventListener("focus", onFocus);
+    return () => { clearInterval(iv); window.removeEventListener("focus", onFocus); };
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
