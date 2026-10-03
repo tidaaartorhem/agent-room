@@ -260,7 +260,7 @@ export default function WorkspaceShell({ initialRoomId }: { initialRoomId?: stri
       const r = await api(`/api/v1/admin/rooms`, { method: "POST", body: JSON.stringify({ goal }) });
       setNewChannelOpen(false);
       setNewGoal("");
-      await refreshRooms();
+      await refreshRooms(false);
       selectRoom(r.roomId);
     } catch (e) { setErr((e as Error).message); }
   };
