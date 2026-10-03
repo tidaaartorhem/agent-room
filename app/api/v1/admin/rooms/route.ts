@@ -26,6 +26,32 @@ export async function GET(req: NextRequest): Promise<Response> {
   }
 }
 
+/** Owner-only: delete a room and its data (archive channel). */
+export async function DELETE(req: NextRequest): Promise<Response> {
+  try {
+    const g = await gate(req, "write");
+    if ("response" in g) return g.response;
+    requireAdmin(g.principal);
+    const roomId = new URL(req.url).searchParams.get("roomId");
+    if (!roomId || !/^room_[0-9a-f]{16}$/.test(roomId)) return badRequest("invalid roomId");
+    const d = db();
+    const collections = [C.messages, C.tasks, C.briefs, C.decisions, C.events, C.runs, C.turns, C.agents, C.credentials, C.idem];
+    for (const c of collections) {
+      const snap = await d.collection(c).where("roomId", "==", roomId).get();
+      // Firestore batch limit is 500; rooms are small, chunk defensively.
+      for (let i = 0; i < snap.docs.length; i += 400) {
+        const batch = d.batch();
+        for (const doc of snap.docs.slice(i, i + 400)) batch.delete(doc.ref);
+        await batch.commit();
+      }
+    }
+    await d.collection(C.rooms).doc(roomId).delete();
+    return Response.json({ ok: true, roomId });
+  } catch (e) {
+    return handleError(e);
+  }
+}
+
 export async function POST(req: NextRequest): Promise<Response> {
   try {
     const g = await gate(req, "write");
