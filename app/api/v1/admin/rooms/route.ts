@@ -8,6 +8,24 @@ import { RoomCreateSchema, badRequest } from "@/lib/schemas";
 
 export const dynamic = "force-dynamic";
 
+/** Owner-only: list rooms for the channel switcher. */
+export async function GET(req: NextRequest): Promise<Response> {
+  try {
+    const g = await gate(req, "read");
+    if ("response" in g) return g.response;
+    requireAdmin(g.principal);
+    const snap = await db().collection(C.rooms).orderBy("createdAt", "desc").limit(50).get();
+    return Response.json({
+      rooms: snap.docs.map((x) => {
+        const r = x.data();
+        return { roomId: r.id, goal: r.goal, createdAt: r.createdAt };
+      }),
+    });
+  } catch (e) {
+    return handleError(e);
+  }
+}
+
 export async function POST(req: NextRequest): Promise<Response> {
   try {
     const g = await gate(req, "write");

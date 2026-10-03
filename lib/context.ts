@@ -1,5 +1,6 @@
 import { db, C } from "./db";
 import { CONFIG } from "./config";
+import { ticketKey } from "./tickets";
 
 export interface AssembledContext {
   text: string;
@@ -55,8 +56,8 @@ export async function assembleContext(roomId: string): Promise<AssembledContext>
   }
   if (tasks.length) {
     sections.push(
-      `[ACTIVE TASKS]\n` +
-        tasks.map((t) => `- ${t.id}: ${t.assignedTo} (${t.taskType}) [${t.state}] assigned by ${t.assignedBy}: ${t.description.slice(0, 200)}`).join("\n")
+      `[OPEN TICKETS - work is organized Jira-style. Reference tickets by key, e.g. TKT-1A2B3C.]\n` +
+        tasks.map((t) => `- ${ticketKey(t.id)}: ${t.assignedTo} (${t.taskType}) [${t.state}] assigned by ${t.assignedBy}: ${t.description.slice(0, 200)}`).join("\n")
     );
   }
 

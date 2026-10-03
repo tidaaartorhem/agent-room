@@ -1,8 +1,8 @@
-import RoomView from "@/components/RoomView";
+import ChatView from "@/components/chat/ChatView";
 
 export const dynamic = "force-dynamic";
 
 export default async function RoomPage({ params }: { params: Promise<{ roomId: string }> }) {
   const { roomId } = await params;
-  return <RoomView roomId={roomId} />;
+  return <ChatView roomId={roomId} />;
 }
