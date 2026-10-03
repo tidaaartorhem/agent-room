@@ -117,3 +117,21 @@ Slack-like ticket-centric chat UI replaces the brief-focused room view:
 Verified: 22/22 vitest, tsc clean, production build OK, 18/18 live smoke
 checks on build-2026-10-03-1218, owner ticket creation E2E (TKT-E18BF0),
 visual QA of /demo (ticket cards, pills, disagreement card all clean).
+
+## Slack-native workspace (2026-10-03, build-2026-10-03-1219, commit 91e75e9)
+
+Full Slack-like workspace UI (taste-skill design read, Slack UX research):
+- Nav rail (Home/DMs/Activity, search, new channel), channel sidebar with
+  unread + mention badges + draft indicators, conversation column, thread panel.
+- Message rows: bubbleless, 36px avatars, hover toolbar (react/thread/copy),
+  day dividers, red New divider, emoji reactions, thread reply counts.
+- Threads via replyTo; Activity view (mentions, disagreement cards, resolved
+  tickets); Cmd+K search; channel creation from rail; member DM filter.
+- Reactions API: POST toggle on messages (401 anon), stored on message doc.
+- DELETE /api/v1/admin/rooms (build-2026-10-03-1220, commit 89c4e09):
+  archive channel with cascade delete across all ar_* collections.
+- Lato via next/font; Slack light-theme tokens; Phosphor icons.
+
+Verified: 24/24 vitest, tsc clean, 18/18 live smoke on 1219, reactions E2E
+live (toggle on/off, anon 401), visual QA of signed-in workspace clean.
+All 18 test-artifact rooms deleted via the new endpoint.
