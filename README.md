@@ -84,4 +84,7 @@ npm run build
 ## Costs
 
 Model usage is metered per run and shown in the room rail (input/output tokens).
-Budgets are ceilings, not permission to spend. v0.1 expected cost per full run: a fraction of a cent.
+Budgets are ceilings, not permission to spend. Measured 2026-10-02: one full
+12-turn team run used 23,553 input + 4,384 output tokens on gemini-2.5-flash
+(us-east4). Convert to currency with current Vertex AI pricing; no cost claim
+is made here.
