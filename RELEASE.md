@@ -98,3 +98,22 @@ One bounded team run, driven server-side, three real Vertex AI agents:
   (held proposals have no version). Fixed with a JSON round-trip sanitizer.
 - `stopRun` 500: Firestore transactions require reads before writes; the task
   query ran after the run update. Reordered; regression test added.
+
+## Redesign deploy (2026-10-03, build-2026-10-03-1218, commit 7f17d9d)
+
+Slack-like ticket-centric chat UI replaces the brief-focused room view:
+- Sidebar (channels from room list, members with provider labels), channel
+  header (run controls, + Ticket), message stream with @role / TKT-XXXXXX
+  pills, composer with @ and # autocomplete + message/ticket mode toggle.
+- Work reframed as Jira-style tickets: ticket keys (TKT-XXXXXX) shared by
+  server (lib/tickets.ts) and client; TicketCard with status/assignee/
+  resolution; agents instructed to tag tickets and @mention each other with
+  questions (lib/prompts.ts, lib/context.ts OPEN TICKETS section).
+- Briefs retired from the UI (backend endpoints remain, unused by the face).
+- New: GET /api/v1/admin/rooms (owner room list); participants included in
+  room state. /demo rewritten as a ticket-based synthetic replay.
+- Old components/components/RoomView.tsx and MessageCard.tsx removed.
+
+Verified: 22/22 vitest, tsc clean, production build OK, 18/18 live smoke
+checks on build-2026-10-03-1218, owner ticket creation E2E (TKT-E18BF0),
+visual QA of /demo (ticket cards, pills, disagreement card all clean).
