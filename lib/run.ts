@@ -481,9 +481,11 @@ export async function stopRun(runId: string): Promise<void> {
     const ref = d.collection(C.runs).doc(runId);
     const snap = await tx.get(ref);
     const r = snap.data()!;
-    tx.update(ref, { state: "stopped", endedAt: Date.now(), epoch: (r.epoch ?? 1) + 1, driver: null });
+    // Firestore transactions require all reads before writes: fetch the
+    // cancellable tasks BEFORE updating the run.
     const tasks = await tx.get(d.collection(C.tasks).where("runId", "==", runId)
       .where("state", "in", ["queued", "accepted", "working", "waiting"]));
+    tx.update(ref, { state: "stopped", endedAt: Date.now(), epoch: (r.epoch ?? 1) + 1, driver: null });
     for (const t of tasks.docs) tx.update(t.ref, { state: "cancelled", cancelledAt: Date.now() });
   });
   const r = (await d.collection(C.runs).doc(runId).get()).data()!;

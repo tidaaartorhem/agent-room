@@ -111,3 +111,4 @@ describe("idempotency result sanitizer", () => {
     expect(cleanForFirestore(undefined)).toBe(null);
   });
 });
+
