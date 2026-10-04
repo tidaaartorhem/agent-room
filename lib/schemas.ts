@@ -10,7 +10,7 @@ export const RoomCreateSchema = z.object({
 
 export const ParticipantSchema = z.object({
   agentId: z.string().min(1).max(64).regex(/^[a-z0-9-]+$/),
-  role: z.enum(["product", "engineer", "reviewer", "single"]),
+  role: z.enum(["product", "engineer", "reviewer", "single", "orchestrator"]),
   providerLabel: z.string().min(1).max(80),
   adapterType: z.enum(["vertex", "external", "synthetic"]),
 });
@@ -39,7 +39,7 @@ export const BriefProposalSchema = z.object({
 
 export const RunStartSchema = z.object({
   roomId: z.string().min(1).max(128),
-  mode: z.enum(["team", "single"]).default("team"),
+  mode: z.enum(["team", "single", "facilitated"]).default("team"),
   // Declared, revocable run policy: accepted internal brief proposals may
   // auto-update the TEAM DRAFT (never owner decisions). Shown at Start.
   autoDraft: z.boolean().default(false),
@@ -59,7 +59,7 @@ export const ChallengePostSchema = z.object({
 export const TokenIssueSchema = z.object({
   roomId: z.string().min(1).max(128),
   agentId: z.string().min(1).max(64),
-  role: z.enum(["product", "engineer", "reviewer", "single"]),
+  role: z.enum(["product", "engineer", "reviewer", "single", "orchestrator"]),
   expiresInDays: z.number().int().min(1).max(90).default(30),
 });
 
