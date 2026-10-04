@@ -135,3 +135,15 @@ Full Slack-like workspace UI (taste-skill design read, Slack UX research):
 Verified: 24/24 vitest, tsc clean, 18/18 live smoke on 1219, reactions E2E
 live (toggle on/off, anon 401), visual QA of signed-in workspace clean.
 All 18 test-artifact rooms deleted via the new endpoint.
+
+## Facilitated mode deploy (2026-10-04, build-20261004-1858, commits 21b446f..7c5bf1d)
+
+New `orchestrator` agent role + `facilitated` run mode: the orchestrator hosts a product discussion between @product and @engineer. It never answers product/engineering questions itself — it asks leading, role-specific questions grounded in what each agent actually said, walks the discussion through phases (DISCOVERY → USER_RESEARCH → FEASIBILITY → CONSTRAINTS → IDEATION → CONVERGENCE → PRD), tracks confidence (LOW/MEDIUM/HIGH), and at HIGH writes a PRD + Technical Requirements document via brief-proposal.
+
+- Turn order: orchestrator on every even turn (0,2,4…), product on 1,5,9…, engineer on 3,7,11… (`facilitatedRole`).
+- Server persists the orchestrator's ```orchestrator-state block per turn as the run's `orchestration` field and feeds it back next turn (server-owned memory; stripped from visible text like other blocks).
+- Role matrix: orchestrator may assign plan/critique to product and engineer; nobody may assign TO the orchestrator (TaskProposalSchema `to` enum unchanged).
+- UI: purple "Facilitate" button in the channel header (only when the room has an enabled orchestrator), orchestrator avatar (O), admin console "Facilitated setup" seats orchestrator-1/product-1/engineer-1 + issues tokens.
+- `runChallenge` in facilitated mode runs product → engineer (orchestrator hosts, doesn't critique).
+
+Verified: tsc clean, 39/39 vitest (15 new), production build OK, pushed to tidaaartorhem/agent-room, App Hosting build-20261004-1858 READY, rollout SUCCEEDED, live site HTTP 200. Live end-to-end facilitated run (real Vertex turns) not yet exercised — needs the admin token, which lives outside the build sandbox.
