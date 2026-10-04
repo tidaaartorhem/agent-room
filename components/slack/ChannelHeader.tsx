@@ -10,11 +10,12 @@ export default function ChannelHeader({ goal, run, participants, driving, onStar
   run: RunInfo | null;
   participants: Participant[];
   driving: boolean;
-  onStart: (mode: "team" | "single", autoDraft: boolean) => void;
+  onStart: (mode: "team" | "single" | "facilitated", autoDraft: boolean) => void;
   onAction: (a: "pause" | "stop" | "resume") => void;
   onNewTicket: () => void;
 }) {
   const active = run && (run.state === "running" || run.state === "paused");
+  const hasOrchestrator = participants.some((p) => p.role === "orchestrator");
   return (
     <header className="border-b border-[#dddddd] bg-white px-5 py-2.5 flex items-center gap-3 shrink-0">
       <Hash size={20} weight="bold" className="text-[#616061] shrink-0" />
@@ -40,9 +41,16 @@ export default function ChannelHeader({ goal, run, participants, driving, onStar
           <span className="text-[12px] font-bold text-[#8a6d00] bg-[#fff4d6] rounded-full px-2.5 py-1">paused</span>
         )}
         {!active && !driving && (
-          <button onClick={() => onStart("team", true)} className="flex items-center gap-1.5 text-[13px] font-bold px-3 h-8 rounded border border-[#dddddd] hover:bg-[#f8f8f8]">
-            <Play size={14} weight="fill" /> Start discussion
-          </button>
+          <>
+            <button onClick={() => onStart("team", true)} className="flex items-center gap-1.5 text-[13px] font-bold px-3 h-8 rounded border border-[#dddddd] hover:bg-[#f8f8f8]">
+              <Play size={14} weight="fill" /> Start discussion
+            </button>
+            {hasOrchestrator && (
+              <button onClick={() => onStart("facilitated", true)} title="Hosted product discussion: orchestrator leads product + engineer to a PRD" className="flex items-center gap-1.5 text-[13px] font-bold px-3 h-8 rounded bg-[#6b4fbb] text-white hover:bg-[#5b3fa8]">
+                <Play size={14} weight="fill" /> Facilitate
+              </button>
+            )}
+          </>
         )}
         {driving && <span className="font-mono text-[12px] text-[#616061]">driving…</span>}
         {run?.state === "running" && (

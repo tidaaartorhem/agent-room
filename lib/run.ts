@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { db, C } from "./db";
-import { CONFIG, AgentRole, RunState } from "./config";
+import { CONFIG, AgentRole, RunMode, RunState } from "./config";
 import { assembleContext, bumpContextVersion } from "./context";
 import { logEvent } from "./events";
 import { canAssign, TEAM_ORDER } from "./roles";
@@ -35,6 +35,7 @@ interface BlockParse {
   taskProposal?: { to: string; taskType: string; description: string };
   taskResult?: { taskId: string; result: string };
   briefProposal?: { baseVersion: number; newText: string };
+  orchestratorState?: { phase: string; confidence: string; openQuestions: string[]; keyDecisions: string[] };
 }
 
 export function parseBlocks(raw: string): BlockParse {
@@ -56,7 +57,19 @@ export function parseBlocks(raw: string): BlockParse {
   if (tr) { const v = safe(tr) as BlockParse["taskResult"]; if (v && typeof v === "object") out.taskResult = v; strip("task-result"); }
   const bp = grab("brief-proposal");
   if (bp) { const v = safe(bp) as BlockParse["briefProposal"]; if (v && typeof v === "object") out.briefProposal = v; strip("brief-proposal"); }
+  const os = grab("orchestrator-state");
+  if (os) { const v = safe(os) as BlockParse["orchestratorState"]; if (v && typeof v === "object") out.orchestratorState = v; strip("orchestrator-state"); }
   return out;
+}
+
+/**
+ * Turn order for facilitated mode: the orchestrator hosts every other turn,
+ * interleaving product and engineer between its questions.
+ * turns 0,2,4… → orchestrator; 1,5,9… → product; 3,7,11… → engineer.
+ */
+export function facilitatedRole(turns: number): AgentRole {
+  if (turns % 2 === 0) return "orchestrator";
+  return turns % 4 === 1 ? "product" : "engineer";
 }
 
 async function getAgents(roomId: string) {
@@ -65,14 +78,16 @@ async function getAgents(roomId: string) {
 }
 
 /** Start a run. Reclaims a stale driver lease; refuses if a live run exists. */
-export async function startRun(roomId: string, opts: { mode: "team" | "single"; autoDraft: boolean; initiatedBy: string }) {
+export async function startRun(roomId: string, opts: { mode: RunMode; autoDraft: boolean; initiatedBy: string }) {
   const roomSnap = await db().collection(C.rooms).doc(roomId).get();
   if (!roomSnap.exists) {
     const e = new Error("unknown room") as Error & { status?: number };
     e.status = 404; throw e;
   }
   const agents = await getAgents(roomId);
-  const need = opts.mode === "team" ? ["product", "engineer", "reviewer"] : ["single"];
+  const need = opts.mode === "team" ? ["product", "engineer", "reviewer"]
+    : opts.mode === "facilitated" ? ["orchestrator", "product", "engineer"]
+    : ["single"];
   for (const r of need) {
     if (!agents.some((a) => a.role === r)) {
       const e = new Error(`room lacks an enabled '${r}' participant`) as Error & { status?: number };
@@ -164,8 +179,11 @@ export async function driveRun(runId: string, onProgress?: (msg: string) => void
       await finishRun(runId, "budget_exhausted", "token budget exhausted"); emit("budget exhausted"); return;
     }
 
-    const order: AgentRole[] = run.mode === "team" ? [...TEAM_ORDER] : ["single"];
-    const role = order[counters.turns % order.length];
+    const role: AgentRole = run.mode === "facilitated"
+      ? facilitatedRole(counters.turns)
+      : run.mode === "team"
+        ? TEAM_ORDER[counters.turns % TEAM_ORDER.length]
+        : "single";
     try {
       await doTurn(runId, roomId, epoch, role, emit);
     } catch (e) {
@@ -205,9 +223,18 @@ async function doTurn(
     .where("state", "in", ["accepted", "queued"]).get();
   for (const t of accepted.docs) await t.ref.update({ state: "working" });
 
-  const prompt =
+  let prompt =
     ctx.text +
     `\n\n[YOUR TURN]\nIt is your turn as ${role} (context v${ctx.contextVersion}, draft v${ctx.briefVersion}). Reply concisely.`;
+
+  // Orchestrator turns get their persisted memory from the previous turn.
+  if (role === "orchestrator") {
+    const runSnap = await d.collection(C.runs).doc(runId).get();
+    const orchestration = runSnap.data()?.orchestration as Record<string, unknown> | undefined;
+    prompt += orchestration
+      ? `\n\n[ORCHESTRATION STATE — your persisted memory from last turn]\n${JSON.stringify(orchestration)}`
+      : `\n\n[ORCHESTRATION STATE: none yet — this is your opening turn. Set the tone: restate the goal crisply, then ask @product your first DISCOVERY questions.]`;
+  }
 
   let result;
   try {
@@ -251,6 +278,18 @@ async function doTurn(
     contextVersion: ctx.contextVersion, status: "complete", createdAt: Date.now(),
   });
   await logEvent(roomId, "message", messageId, { role, agentId: agent.id, turnId });
+
+  // Orchestrator state blocks: persist as the run's orchestration memory.
+  if (role === "orchestrator" && parsed.orchestratorState) {
+    const rsnap = await d.collection(C.runs).doc(runId).get();
+    const prev = (rsnap.data()?.orchestration ?? {}) as Record<string, unknown>;
+    await d.collection(C.runs).doc(runId).update({
+      orchestration: { ...prev, ...parsed.orchestratorState, updatedAt: Date.now() },
+    });
+    await logEvent(roomId, "orchestration", runId, {
+      phase: parsed.orchestratorState.phase, confidence: parsed.orchestratorState.confidence,
+    });
+  }
 
   // Task result blocks: complete the assignee's task.
   if (parsed.taskResult) {
@@ -386,7 +425,8 @@ export async function runChallenge(roomId: string, runId: string, topic: string)
     e.status = 400; throw e;
   }
   const agents = await getAgents(roomId);
-  const order: AgentRole[] = run.mode === "team" ? [...TEAM_ORDER] : ["single"];
+  // The orchestrator hosts; it does not critique. Facilitated challenges run product → engineer.
+  const order: AgentRole[] = run.mode === "team" ? [...TEAM_ORDER] : run.mode === "facilitated" ? ["product", "engineer"] : ["single"];
   const critiques: { role: string; agentId: string; text: string }[] = [];
 
   for (const role of order) {

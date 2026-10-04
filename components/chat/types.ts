@@ -71,6 +71,7 @@ export const ROLE_META: Record<string, { label: string; avatar: string; name: st
   product: { label: "Product", avatar: "bg-[var(--color-pale-blue-bg)] text-[var(--color-pale-blue-tx)]", name: "P" },
   engineer: { label: "Engineer", avatar: "bg-[var(--color-pale-green-bg)] text-[var(--color-pale-green-tx)]", name: "E" },
   reviewer: { label: "Reviewer", avatar: "bg-[var(--color-pale-yellow-bg)] text-[var(--color-pale-yellow-tx)]", name: "R" },
+  orchestrator: { label: "Orchestrator", avatar: "bg-[var(--color-pale-purple-bg)] text-[var(--color-pale-purple-tx)]", name: "O" },
   single: { label: "Agent", avatar: "bg-[var(--color-pale-blue-bg)] text-[var(--color-pale-blue-tx)]", name: "A" },
   owner: { label: "Owner", avatar: "bg-[#111111] text-white", name: "Y" },
   system: { label: "System", avatar: "bg-[var(--color-bone)] text-[var(--color-muted)]", name: "✦" },

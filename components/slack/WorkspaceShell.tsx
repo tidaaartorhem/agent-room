@@ -168,7 +168,7 @@ export default function WorkspaceShell({ initialRoomId }: { initialRoomId?: stri
     router.push(`/room/${id}`);
   };
 
-  const startAndDrive = async (mode: "team" | "single", autoDraft: boolean) => {
+  const startAndDrive = async (mode: "team" | "single" | "facilitated", autoDraft: boolean) => {
     if (!roomId) return;
     setDriving(true);
     setProgress("starting…");

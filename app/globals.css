@@ -34,6 +34,8 @@
   --color-pale-green-tx: #346538;
   --color-pale-yellow-bg: #fbf3db;
   --color-pale-yellow-tx: #956400;
+  --color-pale-purple-bg: #efe9fb;
+  --color-pale-purple-tx: #5b3fa8;
 
   --font-sans: var(--font-lato), -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Helvetica Neue", Arial, sans-serif;

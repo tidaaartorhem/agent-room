@@ -90,6 +90,26 @@ export default function AdminConsole() {
     }
   };
 
+  const facilitatedSetup = async (roomId: string) => {
+    // One-click: orchestrator+product+engineer (vertex) + tokens. Convenience only.
+    try {
+      for (const [aid, role] of [["orchestrator-1", "orchestrator"], ["product-1", "product"], ["engineer-1", "engineer"]] as const) {
+        await adminFetch("/api/v1/admin/participants", {
+          method: "POST",
+          body: JSON.stringify({ roomId, agentId: aid, role, providerLabel: "vertex-ai", adapterType: "vertex" }),
+        });
+        say(`Participant added: ${aid} (${role})`);
+        const t = await adminFetch("/api/v1/admin/tokens", {
+          method: "POST",
+          body: JSON.stringify({ roomId, agentId: aid, role, expiresInDays: 30 }),
+        });
+        say(`Token issued for ${aid} (${t.token.slice(0, 12)}…)`);
+      }
+    } catch (e) {
+      setErr((e as Error).message);
+    }
+  };
+
   const quickSetup = async (roomId: string) => {
     // One-click: product+engineer+reviewer (vertex) + tokens. Convenience only.
     try {
@@ -171,6 +191,9 @@ export default function AdminConsole() {
                   <button onClick={() => quickSetup(createdRoom)} className="btn-ghost text-xs px-3 py-2">
                     Seat Product + Engineer + Reviewer (vertex)
                   </button>
+                  <button onClick={() => facilitatedSetup(createdRoom)} className="btn-ghost text-xs px-3 py-2">
+                    Facilitated setup: Orchestrator + Product + Engineer (vertex)
+                  </button>
                   <Link href={`/room/${createdRoom}`} className="btn-primary text-xs px-4 py-2">
                     Open room
                   </Link>
@@ -188,6 +211,7 @@ export default function AdminConsole() {
                 <option value="product">product</option>
                 <option value="engineer">engineer</option>
                 <option value="reviewer">reviewer</option>
+                <option value="orchestrator">orchestrator</option>
                 <option value="single">single</option>
               </select>
               <select value={pAdapter} onChange={(e) => setPAdapter(e.target.value)} className={field}>
@@ -211,6 +235,7 @@ export default function AdminConsole() {
                 <option value="product">product</option>
                 <option value="engineer">engineer</option>
                 <option value="reviewer">reviewer</option>
+                <option value="orchestrator">orchestrator</option>
                 <option value="single">single</option>
               </select>
             </div>

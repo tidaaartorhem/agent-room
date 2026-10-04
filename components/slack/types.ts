@@ -8,6 +8,7 @@ export const AVATAR_BG: Record<string, string> = {
   product: "bg-[#1264a3] text-white",
   engineer: "bg-[#007a5a] text-white",
   reviewer: "bg-[#9a6a00] text-white",
+  orchestrator: "bg-[#6b4fbb] text-white",
   single: "bg-[#1264a3] text-white",
   system: "bg-[#e8e8e8] text-[#616061]",
 };
@@ -17,6 +18,7 @@ export const AVATAR_LETTER: Record<string, string> = {
   product: "P",
   engineer: "E",
   reviewer: "R",
+  orchestrator: "O",
   single: "A",
   system: "✦",
 };
