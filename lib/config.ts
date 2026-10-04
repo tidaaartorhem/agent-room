@@ -22,8 +22,9 @@ export const CONFIG = {
   rateRoomWritePerMin: 30,
 } as const;
 
-export type Role = "product" | "engineer" | "reviewer" | "single" | "owner";
-export type AgentRole = "product" | "engineer" | "reviewer" | "single";
+export type Role = "product" | "engineer" | "reviewer" | "single" | "owner" | "orchestrator";
+export type AgentRole = "product" | "engineer" | "reviewer" | "single" | "orchestrator";
+export type RunMode = "team" | "single" | "facilitated";
 export type RunState =
   | "idle" | "running" | "paused" | "completed" | "stopped" | "error" | "budget_exhausted";
 export type TurnState =
